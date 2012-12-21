@@ -2629,6 +2629,7 @@ var d3_category20c = [
   "#756bb1", "#9e9ac8", "#bcbddc", "#dadaeb",
   "#636363", "#969696", "#bdbdbd", "#d9d9d9"
 ];
+
 d3.scale.quantile = function() {
   return d3_scale_quantile([], []);
 };
