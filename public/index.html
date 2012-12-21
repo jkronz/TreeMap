@@ -5,6 +5,7 @@
   <link type="text/css" rel="stylesheet" href="lib/style.css"/>
   <script type="text/javascript" src="lib/d3.js"></script>
   <script type="text/javascript" src="lib/d3.layout.js"></script>
+  <script type="text/javascript" src="src/colors.js"></script>
   <style type="text/css">
 
     .chart {
@@ -39,7 +40,7 @@
           h = 800 - 180,
           x = d3.scale.linear().range([0, w]),
           y = d3.scale.linear().range([0, h]),
-          color = d3.scale.category20c(),
+          color = QuantDesk.app.color(),
           root,
           node;
 
