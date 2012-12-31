@@ -66,6 +66,7 @@
     node = root = data;
 
     var nodes = treemap.nodes(root).reverse();
+    nodes.pop();
     var cell = svg.selectAll("g")
             .data(nodes)
             .enter().append("svg:g")
@@ -152,9 +153,15 @@
     var kx = w / d.dx, ky = h / d.dy, dElement = d3.select(element);
     x.domain([d.x, d.x + d.dx]);
     y.domain([d.y, d.y + d.dy]);
-    dElement.attr("display", function() {
-      return "none";
-    });
+
+    if (d.depth > 0) {
+        dElement.attr("display", function() {
+        return "none";
+      });
+    } else {
+      resetContainerVisibility();
+    }
+
     var t = svg.selectAll("g.cell").transition()
             .duration(d3.event.altKey ? 7500 : 750)
             .attr("transform", function(d) {
@@ -165,7 +172,6 @@
             .attr("width", function(d) {
               return kx * d.dx - 1;
             })
-            .attr("display", "block")
             .attr("height", function(d) {
               return ky * d.dy - 1;
             });
@@ -187,6 +193,10 @@
 
     node = d;
     d3.event.stopPropagation();
+  }
+
+  function resetContainerVisibility() {
+    d3.selectAll("g.cell").attr("display", "");
   }
 </script>
 </body>
