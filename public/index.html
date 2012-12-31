@@ -36,8 +36,8 @@
   </div>
 </div>
 <script type="text/javascript">
-  var w = 1280 - 80,
-          h = 800 - 180,
+  var w = 640,
+          h = 480,
           x = d3.scale.linear().range([0, w]),
           y = d3.scale.linear().range([0, h]),
           color = QuantDesk.app.color(),
@@ -66,8 +66,6 @@
     node = root = data;
 
     var nodes = treemap.nodes(root).reverse();
-    nodes.pop();
-    console.log(nodes);
     var cell = svg.selectAll("g")
             .data(nodes)
             .enter().append("svg:g")
@@ -76,8 +74,7 @@
               return "translate(" + d.x + "," + d.y + ")";
             })
             .on("click", function(d) {
-                console.log(['click', d]);
-                return zoom(d.children ? d : root);
+                return zoom(d.children ? d : root, this);
             });
 
     cell.append("svg:rect")
@@ -150,12 +147,14 @@
   }
   var currentDepth = 1;
 
-  function zoom(d) {
+  function zoom(d, element) {
     currentDepth = d.depth + 1;
-    var kx = w / d.dx, ky = h / d.dy;
+    var kx = w / d.dx, ky = h / d.dy, dElement = d3.select(element);
     x.domain([d.x, d.x + d.dx]);
     y.domain([d.y, d.y + d.dy]);
-
+    dElement.attr("display", function() {
+      return "none";
+    });
     var t = svg.selectAll("g.cell").transition()
             .duration(d3.event.altKey ? 7500 : 750)
             .attr("transform", function(d) {
@@ -166,6 +165,7 @@
             .attr("width", function(d) {
               return kx * d.dx - 1;
             })
+            .attr("display", "block")
             .attr("height", function(d) {
               return ky * d.dy - 1;
             });
