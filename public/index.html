@@ -62,6 +62,30 @@
           .append("svg:g")
           .attr("transform", "translate(.5,.5)");
 
+  var gradient = svg.append("svg:defs")
+          .append("svg:linearGradient")
+          .attr("id", "gradient")
+          .attr("x1", "0%")
+          .attr("y1", "0%")
+          .attr("x2", "100%")
+          .attr("y2", "100%")
+          .attr("spreadMethod", "pad");
+
+  gradient.append("svg:stop")
+          .attr("offset", "0%")
+          .attr("stop-color", "#ccc")
+          .attr("stop-opacity", 1);
+
+  gradient.append("svg:stop")
+          .attr("offset", "60%")
+          .attr("stop-color", "#ccc")
+          .attr("stop-opacity", 0);
+
+  gradient.append("svg:stop")
+          .attr("offset", "100%")
+          .attr("stop-color", "#ccc")
+          .attr("stop-opacity", 0);
+
   d3.json("../lib/data.json", function(data) {
     node = root = data;
 
@@ -75,7 +99,7 @@
               return "translate(" + d.x + "," + d.y + ")";
             })
             .on("click", function(d) {
-                return zoom(d.children ? d : root, this);
+              return zoom(d.children ? d : root, this);
             });
 
     cell.append("svg:rect")
@@ -85,16 +109,13 @@
             .attr("height", function(d) {
               return d.dy - 1;
             })
-            .style("stroke", function(d) {
-              if (d.children && d.depth == currentDepth) {
-                return "#0000FF";
-              } else {
-                return "transparent";
-              }
-            })
             .style("fill", function(d) {
               if (d.children) {
-                return "transparent";
+                if (d.depth == currentDepth) {
+                  return "url(#gradient)";
+                } else {
+                  return "transparent";
+                }
               } else {
                 return color(d.volume);
               }
@@ -155,7 +176,7 @@
     y.domain([d.y, d.y + d.dy]);
 
     if (d.depth > 0) {
-        dElement.attr("display", function() {
+      dElement.attr("display", function() {
         return "none";
       });
     } else {
@@ -174,6 +195,17 @@
             })
             .attr("height", function(d) {
               return ky * d.dy - 1;
+            })
+            .style("fill", function(d) {
+              if (d.children) {
+                if (d.depth == currentDepth) {
+                  return "url(#gradient)";
+                } else {
+                  return "transparent";
+                }
+              } else {
+                return color(d.volume);
+              }
             });
 
     t.select("text")
