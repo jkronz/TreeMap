@@ -5,6 +5,7 @@
   <link type="text/css" rel="stylesheet" href="lib/style.css"/>
   <script type="text/javascript" src="lib/d3.js"></script>
   <script type="text/javascript" src="lib/d3.layout.js"></script>
+  <script type="text/javascript" src="lib/lodash.min.js"></script>
   <script type="text/javascript" src="src/colors.js"></script>
   <style type="text/css">
     .chart {
@@ -37,7 +38,8 @@
           y = d3.scale.linear().range([0, h]),
           color = QuantDesk.app.color(),
           root,
-          node;
+          node,
+          nodes;
 
   var treemap = d3.layout.treemap()
           .round(false)
@@ -84,7 +86,7 @@
   d3.json("../lib/data.json", function(data) {
     node = root = data;
 
-    var nodes = treemap.nodes(root).reverse();
+    nodes = treemap.nodes(root).reverse();
     nodes.pop();
     var cell = svg.selectAll("g")
             .data(nodes)
@@ -150,6 +152,55 @@
 
   var currentDepth = 1;
 
+  function collectChildren(node) {
+    var queue = [];
+    var results = [];
+    var next = node;
+    while (next) {
+      if (next.children) {
+        _.each(next.children, function(child) {
+          queue.push(child);
+        });
+      } else {
+        results.push(next);
+      }
+      next = queue.shift()
+    }
+    return results;
+  }
+
+  function averageVolume(node) {
+    var childPositions = collectChildren(node);
+    var totalVolume = _.reduce(childPositions, function(accum, child) {
+      return accum + child.volume
+    }, 0);
+    return totalVolume / childPositions.length;
+  }
+
+  function volumeHistogram(node) {
+    var childPositions = collectChildren(node);
+    var lastColumn = 19;
+    var min = _.min(childPositions, function(child) {
+      return child.volume;
+    });
+    min = min.volume;
+    var max = _.max(childPositions, function(child) {
+      return child.volume;
+    });
+    max = max.volume;
+    var columnRange = (max - min) / lastColumn;
+    var column, columnIndex;
+    return _.reduce(childPositions, function(accum, child) {
+      columnIndex = Math.floor((child.volume - min) / columnRange);
+      accum[columnIndex] = accum[columnIndex] + 1;
+      return accum
+    }, [0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0]);
+  }
+
+
   function zoom(d, element) {
     currentDepth = d.depth + 1;
     var kx = w / d.dx, ky = h / d.dy, dElement = d3.select(element);
@@ -205,6 +256,7 @@
             });
 
     node = d;
+    volumeHistogram(node);
     d3.event.stopPropagation();
   }
 
